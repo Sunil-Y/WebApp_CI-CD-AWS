@@ -1,8 +1,11 @@
 # Web Application Continuous Integration and Continuous Deployment pipeline using: 
+<img src="https://github.com/Sunil-Y/WebApp_CI-CD-AWS/blob/master/extra/flow.JPG">
 
 ## Technology Stack
-Node.js
-PostgreSQL
+### Node.js
+### PostgreSQL
+
+## Provisioning AWS infrastructure using AWS CloudFormation:
 
 ## Build Instructions
  
