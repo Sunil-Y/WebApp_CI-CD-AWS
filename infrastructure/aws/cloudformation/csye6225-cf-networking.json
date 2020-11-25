@@ -1,0 +1,238 @@
+{
+    "AWSTemplateFormatVersion": "2010-09-09",
+    "Description": "Cloud Formation Template",
+    "Parameters": {
+      "environmentName": {
+        "Description": "environmentName",
+        "Type": "String"
+      },
+      "vpcCidr": {
+        "Description": "vpcId",
+        "Type": "String"
+      },
+      "publicSubnet1Cidr": {
+        "Description": "publicSubnet1Cidr",
+        "Type": "String"
+      },
+      "publicSubnet2Cidr": {
+        "Description": "publicSubnet2Cidr",
+        "Type": "String"
+      },
+      "publicSubnet3Cidr": {
+        "Description": "publicSubnet3Cidr",
+        "Type": "String"
+      },
+      "publicSubnet4Cidr": {
+        "Description": "publicSubnet4Cidr",
+        "Type": "String"
+      },
+      "stackName": {
+        "Description": "stackName",
+        "Type": "String"
+      }
+    },
+    "Resources": {
+      "VPC": {
+        "Type": "AWS::EC2::VPC",
+        "Properties": {
+          "CidrBlock": {
+            "Ref": "vpcCidr"
+          },
+          "InstanceTenancy": "default",
+          "Tags": [
+            {
+              "Key": "Name",
+              "Value": {
+                "Fn::Join": [
+                  "-",
+                  [
+                    {
+                      "Ref": "stackName"
+                    },
+                    "csye6225",
+                    "vpc"
+                  ]
+                ]
+              }
+            }
+          ]
+        }
+      },
+      "InternetGateway": {
+        "Type": "AWS::EC2::InternetGateway",
+        "Properties": {
+          "Tags": [
+            {
+              "Key": "Name",
+              "Value": {
+                "Ref": "environmentName"
+              }
+            }
+          ]
+        }
+      },
+      "InternetGatewayAttachment": {
+        "Type": "AWS::EC2::VPCGatewayAttachment",
+        "Properties": {
+          "InternetGatewayId": {
+            "Ref": "InternetGateway"
+          },
+          "VpcId": {
+            "Ref": "VPC"
+          }
+        }
+      },
+
+      "RouteTable": {
+        "Type": "AWS::EC2::RouteTable",
+        "Properties": {
+          "VpcId": {
+            "Ref": "VPC"
+          },
+          "Tags": [
+            {
+              "Key": "Name",
+              "Value": {
+                "Fn::Join": [
+                  "-",
+                  [
+                    {
+                      "Ref": "stackName"
+                    },
+                    "csye6225",
+                    "rt"
+                  ]
+                ]
+              }
+            }
+          ]
+        }
+      },
+
+      "Route": {
+        "Type": "AWS::EC2::Route",
+        "Properties": {
+          "RouteTableId": {
+            "Ref": "RouteTable"
+          },
+          "DestinationCidrBlock": "0.0.0.0/0",
+          "GatewayId": {
+            "Ref": "InternetGateway"
+          }
+        }
+      },
+
+      "Subnet1": {
+        "Type": "AWS::EC2::Subnet",
+        "Properties": {
+          "VpcId": {
+            "Ref": "VPC"
+          },
+          "CidrBlock": {
+            "Ref": "publicSubnet1Cidr"
+          },
+          "AvailabilityZone": "us-east-1e",
+          "MapPublicIpOnLaunch" : true,
+          "Tags" : [{"Key" : "Name", "Value" : {"Fn::Join" : ["",[{"Ref" : "stackName"},"-csye6225-subnet1"]] }}]
+        }
+      },
+
+      "Subnet1RouteTableAssociation": {
+        "Type": "AWS::EC2::SubnetRouteTableAssociation",
+        "Properties": {
+          "SubnetId": {
+            "Ref": "Subnet1"
+          },
+          "RouteTableId": {
+            "Ref": "RouteTable"
+          }
+        }
+      },
+
+      "RouteTable2" : {
+        "Type" : "AWS::EC2::RouteTable",
+        "Properties" : {
+          "VpcId" : {"Ref" : "VPC"},
+          "Tags" : [ {"Key" : "Name", "Value" : {"Fn::Join" : ["",[{"Ref" : "stackName"},"-csye6225-private-route-table"]] }}]
+        }
+    },
+
+      "Subnet2": {
+        "Type": "AWS::EC2::Subnet",
+        "Properties": {
+          "VpcId": {
+            "Ref": "VPC"
+          },
+          "CidrBlock": {
+            "Ref": "publicSubnet2Cidr"
+          },
+          "AvailabilityZone": "us-east-1b",
+          "Tags" : [{"Key" : "Name", "Value" : {"Fn::Join" : ["",[{"Ref" : "stackName"},"-csye6225-subnet2"]] }}]
+        }
+      },
+      "Subnet2RouteTableAssociation": {
+        "Type": "AWS::EC2::SubnetRouteTableAssociation",
+        "Properties": {
+          "SubnetId": {
+            "Ref": "Subnet2"
+          },
+          "RouteTableId": {
+            "Ref": "RouteTable2"
+          }
+        }
+      },
+
+      "Subnet3": {
+        "Type": "AWS::EC2::Subnet",
+        "Properties": {
+          "VpcId": {
+            "Ref": "VPC"
+          },
+          "CidrBlock": {
+            "Ref": "publicSubnet3Cidr"
+          },
+          "AvailabilityZone": "us-east-1f",
+          "Tags" : [{"Key" : "Name", "Value" : {"Fn::Join" : ["",[{"Ref" : "stackName"},"-csye6225-subnet3"]] }}]
+        }
+      },
+      "Subnet3RouteTableAssociation": {
+        "Type": "AWS::EC2::SubnetRouteTableAssociation",
+        "Properties": {
+          "SubnetId": {
+            "Ref": "Subnet3"
+          },
+          "RouteTableId": {
+            "Ref": "RouteTable2"
+          }
+        }
+      },
+
+      "Subnet4": {
+        "Type": "AWS::EC2::Subnet",
+        "Properties": {
+          "VpcId": {
+            "Ref": "VPC"
+          },
+          "CidrBlock": {
+            "Ref": "publicSubnet4Cidr"
+          },
+          "AvailabilityZone": "us-east-1c",
+          "MapPublicIpOnLaunch" : true,
+          "Tags" : [{"Key" : "Name", "Value" : {"Fn::Join" : ["",[{"Ref" : "stackName"},"-csye6225-subnet4"]] }}]
+        }
+      },
+
+      "Subnet4RouteTableAssociation": {
+        "Type": "AWS::EC2::SubnetRouteTableAssociation",
+        "Properties": {
+          "SubnetId": {
+            "Ref": "Subnet4"
+          },
+          "RouteTableId": {
+            "Ref": "RouteTable"
+          }
+        }
+      }
+
+    }
+  }

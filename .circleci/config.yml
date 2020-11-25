@@ -1,0 +1,59 @@
+
+version: 2
+jobs:
+  build:
+    working_directory: ~/webapp
+    filters:
+      branches:
+        only:
+          - master
+    docker:
+      # specify the version you desire here
+      - image: rupeshacharya/aws-node-python
+
+    steps:
+      # Checkout the code from the branch into the working_directory
+      - checkout
+      - run:
+          name: Testing with mocha
+          command: cd webapp
+
+      - run:
+          name: Installing Packages
+          command: cd webapp; npm install; npm install -g mocha; ls; mocha
+
+  deploy:
+    working_directory: ~/webapp
+    
+    docker:
+      - image: rupeshacharya/aws-node-python
+
+    steps:
+      - checkout
+      - run:
+          name: Bucket name
+          command: echo $BUCKET_NAME
+
+      - run:    
+          name: Deploying app to s3
+          command: aws deploy push --application-name csye6225-webapp --description "Test" --region us-east-1 --s3-location s3://$BUCKET_NAME/webapp.zip --source .
+
+      - run:
+          name: Deploying app from s3 to EC2
+          command: ETag=$(aws s3api head-object --bucket $BUCKET_NAME --key webapp.zip --query ETag --output text); echo $ETag; aws deploy create-deployment --application-name csye6225-webapp --deployment-config-name CodeDeployDefault.AllAtOnce --deployment-group-name csye6225-webapp-deployment --region us-east-1 --s3-location bucket=$BUCKET_NAME,key=webapp.zip,bundleType=zip,eTag=$ETag
+
+workflows:
+  version: 2
+  
+  build-and-deploy:
+    jobs:
+      - build
+      - deploy:
+          requires: 
+            - build
+
+          filters: 
+            branches:
+              only:
+                - master
+
